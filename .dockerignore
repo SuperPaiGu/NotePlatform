@@ -1,0 +1,6 @@
+venv/
+__pycache__/
+*.pyc
+.git/
+*.json
+需求和日志/
