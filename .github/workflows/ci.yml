@@ -23,3 +23,44 @@ jobs:
 
       - name: Build Docker image
         run: docker build -t noteplatform:ci .
+
+      - name: Docker Compose up
+        run: docker compose up --build -d
+
+      - name: Check application health
+        run: |
+          # Wait for the application to be healthy
+          for i in {1..10}; do
+            echo "Checking application health (attempt $i)..."
+            if curl -f http://localhost:8000/health; then
+              echo "Application is healthy"
+              exit 0
+            fi
+            sleep 3
+          done
+          echo "Application is not healthy"
+          exit 1
+
+      - name: Check application readiness
+        run: |
+          # Wait for the application to be ready
+          for i in {1..10}; do
+            echo "Checking application readiness (attempt $i)..."
+            if curl -f http://localhost:8000/ready; then
+              echo "Application is ready"
+              exit 0
+            fi
+            sleep 3
+          done
+          echo "Application is not ready"
+          exit 1
+
+      - name: Print Logs when failing
+        if: failure()
+        run: |
+          docker compose ps
+          docker compose logs
+
+      - name: Shutdown Docker Compose
+        if: always()
+        run: docker compose down
