@@ -91,7 +91,8 @@ jobs:
           notes_response=$(curl -f http://localhost:8000/api/notes)
 
           echo "Checking notes list..."
-          if [[ $(echo "$notes_response" | python -c "import sys, json; data=json.loads(sys.stdin.read()); print(data[0]['title'])") == "CI-Test-note" ]]; then
+          notes_check=$(echo "$notes_response" | python -c "import sys, json; data=json.loads(sys.stdin.read()); print('found' if any(note.get('title') == 'CI-Test-note' for note in data) else 'not_found')")
+          if [[ "$notes_check" == "found" ]]; then
             echo "Notes listed successfully"
           else
             echo "Failed to list notes"
