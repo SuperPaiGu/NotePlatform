@@ -55,6 +55,51 @@ jobs:
           echo "Application is not ready"
           exit 1
 
+      - name: Business smoke test
+        run: |
+          # Perform a simple business smoke test
+          echo "Starting business smoke test..."
+
+          echo "Creating category..."
+          category_response=$(curl -f -X POST http://localhost:8000/api/categories -H "Content-Type: application/json" -d '{"name": "CI-Test-Category"}')
+          
+          echo "Checking category response..."
+          if [[ $(echo "$category_response" | python -c "import sys, json; data=json.loads(sys.stdin.read()); print(data['name'])") == "CI-Test-Category" ]]; then
+            echo "Category created successfully"
+          else
+            echo "Failed to create category"
+            exit 1
+          fi
+          category_id=$(echo "$category_response" | python -c "import sys, json; data=json.loads(sys.stdin.read()); print(data['id'])")
+          if [[ -z "$category_id" || "$category_id" == "null" ]]; then
+            echo "Failed to retrieve category ID"
+            exit 1
+          fi
+
+          echo "Creating note..."
+          note_response=$(curl -f -X POST http://localhost:8000/api/notes -H "Content-Type: application/json" -d "{\"title\": \"CI-Test-note\", \"content\": \"This is a test note for CI.\", \"category_id\": $category_id}")
+
+          echo "Checking note response..."
+          if [[ $(echo "$note_response" | python -c "import sys, json; data=json.loads(sys.stdin.read()); print(data['title'])") == "CI-Test-note" ]]; then
+            echo "Note created successfully"
+          else
+            echo "Failed to create note"
+            exit 1
+          fi
+
+          echo "Listing notes..."
+          notes_response=$(curl -f http://localhost:8000/api/notes)
+
+          echo "Checking notes list..."
+          if [[ $(echo "$notes_response" | python -c "import sys, json; data=json.loads(sys.stdin.read()); print(data[0]['title'])") == "CI-Test-note" ]]; then
+            echo "Notes listed successfully"
+          else
+            echo "Failed to list notes"
+            exit 1
+          fi
+
+          echo "Business smoke test passed"
+
       - name: Print Logs when failing
         if: failure()
         run: |
