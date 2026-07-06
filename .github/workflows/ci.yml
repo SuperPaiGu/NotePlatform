@@ -78,7 +78,8 @@ jobs:
 
           echo "Creating note..."
           note_response=$(curl -f -X POST http://localhost:8000/api/notes -H "Content-Type: application/json" -d "{\"title\": \"CI-Test-note\", \"content\": \"This is a test note for CI.\", \"category_id\": $category_id}")
-
+          note_id=$(echo "$note_response" | python -c "import sys, json; data=json.loads(sys.stdin.read()); print(data['id'])")
+          
           echo "Checking note response..."
           if [[ $(echo "$note_response" | python -c "import sys, json; data=json.loads(sys.stdin.read()); print(data['title'])") == "CI-Test-note" ]]; then
             echo "Note created successfully"
@@ -96,6 +97,63 @@ jobs:
             echo "Notes listed successfully"
           else
             echo "Failed to list notes"
+            exit 1
+          fi
+
+          echo "Updating note..."
+          update_response=$(curl -f -X PUT http://localhost:8000/api/notes/$note_id -H "Content-Type: application/json" -d "{\"title\": \"CI-Test-note-updated\", \"content\": \"Updated by CI.\", \"category_id\": $category_id}")
+
+          echo "Checking update response..."
+          if [[ $(echo "$update_response" | python -c "import sys, json; data=json.loads(sys.stdin.read()); print(data['title'])") == "CI-Test-note-updated" ]]; then
+            echo "Note updated successfully"
+          else
+            echo "Failed to update note"
+            exit 1
+          fi
+
+          echo "Deleting category while note still exists..."
+          delete_category_status=$(curl -s -o delete_category_response.txt -w "%{http_code}" -X DELETE http://localhost:8000/api/categories/$category_id)
+
+          echo "Checking delete category conflict..."
+          if [[ "$delete_category_status" == "409" ]]; then
+            echo "Category deletion correctly blocked"
+          else
+            echo "Expected 409 but got $delete_category_status"
+            cat delete_category_response.txt
+            exit 1
+          fi
+
+          echo "Deleting note..."
+          delete_note_status=$(curl -s -o delete_note_response.txt -w "%{http_code}" -X DELETE http://localhost:8000/api/notes/$note_id)
+
+          echo "Checking note deletion..."
+          if [[ "$delete_note_status" == "200" ]]; then
+            echo "Note deleted successfully"
+          else
+            echo "Expected 200 but got $delete_note_status"
+            cat delete_note_response.txt
+            exit 1
+          fi
+
+          echo "Deleting category after note deletion..."
+          delete_category_after_note_status=$(curl -s -o delete_category_after_note_response.txt -w "%{http_code}" -X DELETE http://localhost:8000/api/categories/$category_id)
+
+          echo "Checking category deletion after note deletion..."
+          if [[ "$delete_category_after_note_status" == "200" ]]; then
+            echo "Category deleted successfully after note deletion"
+          else
+            echo "Expected 200 but got $delete_category_after_note_status"
+            cat delete_category_after_note_response.txt
+            exit 1
+          fi
+
+          echo "Checking deleted note..."
+          check_deleted_note_status=$(curl -s -o check_deleted_note_response.txt -w "%{http_code}" http://localhost:8000/api/notes/$note_id)
+          if [[ "$check_deleted_note_status" == "404" ]]; then
+            echo "Deleted note correctly returns 404"
+          else
+            echo "Expected 404 but got $check_deleted_note_status"
+            cat check_deleted_note_response.txt
             exit 1
           fi
 
