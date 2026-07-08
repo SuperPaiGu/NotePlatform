@@ -38,7 +38,7 @@ jobs:
           # Wait for the application to be healthy
           for i in {1..10}; do
             echo "Checking application health (attempt $i)..."
-            if curl -f http://localhost:8000/health; then
+            if curl -f http://localhost/health; then
               echo "Application is healthy"
               exit 0
             fi
@@ -52,7 +52,7 @@ jobs:
           # Wait for the application to be ready
           for i in {1..10}; do
             echo "Checking application readiness (attempt $i)..."
-            if curl -f http://localhost:8000/ready; then
+            if curl -f http://localhost/ready; then
               echo "Application is ready"
               exit 0
             fi
@@ -67,7 +67,7 @@ jobs:
           echo "Starting business smoke test..."
 
           echo "Creating category..."
-          category_response=$(curl -f -X POST http://localhost:8000/api/categories -H "Content-Type: application/json" -d '{"name": "CI-Test-Category"}')
+          category_response=$(curl -f -X POST http://localhost/api/categories -H "Content-Type: application/json" -d '{"name": "CI-Test-Category"}')
           
           echo "Checking category response..."
           if [[ $(echo "$category_response" | python -c "import sys, json; data=json.loads(sys.stdin.read()); print(data['name'])") == "CI-Test-Category" ]]; then
@@ -83,7 +83,7 @@ jobs:
           fi
 
           echo "Creating note..."
-          note_response=$(curl -f -X POST http://localhost:8000/api/notes -H "Content-Type: application/json" -d "{\"title\": \"CI-Test-note\", \"content\": \"This is a test note for CI.\", \"category_id\": $category_id}")
+          note_response=$(curl -f -X POST http://localhost/api/notes -H "Content-Type: application/json" -d "{\"title\": \"CI-Test-note\", \"content\": \"This is a test note for CI.\", \"category_id\": $category_id}")
           note_id=$(echo "$note_response" | python -c "import sys, json; data=json.loads(sys.stdin.read()); print(data['id'])")
           
           echo "Checking note response..."
@@ -95,7 +95,7 @@ jobs:
           fi
 
           echo "Listing notes..."
-          notes_response=$(curl -f http://localhost:8000/api/notes)
+          notes_response=$(curl -f http://localhost/api/notes)
 
           echo "Checking notes list..."
           notes_check=$(echo "$notes_response" | python -c "import sys, json; data=json.loads(sys.stdin.read()); print('found' if any(note.get('title') == 'CI-Test-note' for note in data) else 'not_found')")
@@ -107,7 +107,7 @@ jobs:
           fi
 
           echo "Updating note..."
-          update_response=$(curl -f -X PUT http://localhost:8000/api/notes/$note_id -H "Content-Type: application/json" -d "{\"title\": \"CI-Test-note-updated\", \"content\": \"Updated by CI.\", \"category_id\": $category_id}")
+          update_response=$(curl -f -X PUT http://localhost/api/notes/$note_id -H "Content-Type: application/json" -d "{\"title\": \"CI-Test-note-updated\", \"content\": \"Updated by CI.\", \"category_id\": $category_id}")
 
           echo "Checking update response..."
           if [[ $(echo "$update_response" | python -c "import sys, json; data=json.loads(sys.stdin.read()); print(data['title'])") == "CI-Test-note-updated" ]]; then
@@ -118,7 +118,7 @@ jobs:
           fi
 
           echo "Deleting category while note still exists..."
-          delete_category_status=$(curl -s -o delete_category_response.txt -w "%{http_code}" -X DELETE http://localhost:8000/api/categories/$category_id)
+          delete_category_status=$(curl -s -o delete_category_response.txt -w "%{http_code}" -X DELETE http://localhost/api/categories/$category_id)
 
           echo "Checking delete category conflict..."
           if [[ "$delete_category_status" == "409" ]]; then
@@ -130,7 +130,7 @@ jobs:
           fi
 
           echo "Deleting note..."
-          delete_note_status=$(curl -s -o delete_note_response.txt -w "%{http_code}" -X DELETE http://localhost:8000/api/notes/$note_id)
+          delete_note_status=$(curl -s -o delete_note_response.txt -w "%{http_code}" -X DELETE http://localhost/api/notes/$note_id)
 
           echo "Checking note deletion..."
           if [[ "$delete_note_status" == "200" ]]; then
@@ -142,7 +142,7 @@ jobs:
           fi
 
           echo "Deleting category after note deletion..."
-          delete_category_after_note_status=$(curl -s -o delete_category_after_note_response.txt -w "%{http_code}" -X DELETE http://localhost:8000/api/categories/$category_id)
+          delete_category_after_note_status=$(curl -s -o delete_category_after_note_response.txt -w "%{http_code}" -X DELETE http://localhost/api/categories/$category_id)
 
           echo "Checking category deletion after note deletion..."
           if [[ "$delete_category_after_note_status" == "200" ]]; then
@@ -154,7 +154,7 @@ jobs:
           fi
 
           echo "Checking deleted note..."
-          check_deleted_note_status=$(curl -s -o check_deleted_note_response.txt -w "%{http_code}" http://localhost:8000/api/notes/$note_id)
+          check_deleted_note_status=$(curl -s -o check_deleted_note_response.txt -w "%{http_code}" http://localhost/api/notes/$note_id)
           if [[ "$check_deleted_note_status" == "404" ]]; then
             echo "Deleted note correctly returns 404"
           else
