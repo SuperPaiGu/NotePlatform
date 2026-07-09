@@ -3,3 +3,4 @@ __pycache__/
 *.pyc
 .omo/
 需求和日志/
+certs/
