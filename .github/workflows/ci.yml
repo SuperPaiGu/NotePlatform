@@ -37,6 +37,11 @@ jobs:
             -keyout certs/server.key -out certs/server.crt \
             -days 365 -subj "/CN=localhost"
 
+      - name: Create .env file for CI
+        run: |
+          echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" >> .env
+          echo "MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }}" >> .env
+
       - name: Docker Compose up
         run: docker compose up --build -d
 

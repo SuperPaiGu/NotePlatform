@@ -4,3 +4,4 @@ __pycache__/
 .omo/
 需求和日志/
 certs/
+.env

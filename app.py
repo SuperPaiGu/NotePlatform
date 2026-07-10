@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-import pymysql
+import pymysql, os
 
 app = Flask(__name__)
 app.json.ensure_ascii = False
@@ -9,8 +9,8 @@ def get_db():
         host="db",
         port=3306,
         user="root",
-        password="rootpass",
-        database="notedb",
+        password=os.environ["MYSQL_ROOT_PASSWORD"],
+        database=os.environ["MYSQL_DATABASE"],
         charset="utf8mb4",
         cursorclass=pymysql.cursors.DictCursor
     )
