@@ -17,7 +17,7 @@ def get_db():
 
 @app.route("/health")
 def health():
-    return {"status": "ok"}
+    return {"status": "ok", "version": "v2"}
 
 @app.route("/api/notes", methods=["GET"])
 def list_notes():
