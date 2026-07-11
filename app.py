@@ -1,8 +1,12 @@
 from flask import Flask, request, jsonify
-import pymysql, os
+from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_LATEST
+import pymysql, os, time
 
 app = Flask(__name__)
 app.json.ensure_ascii = False
+
+REQUEST_COUNT = Counter("http_requests_total", "Total HTTP requests", ["method", "endpoint", "http_status"])
+REQUEST_LATENCY = Histogram("http_request_duration_seconds", "Http request latency", ["method", "endpoint"])
 
 def get_db():
     return pymysql.connect(
@@ -14,6 +18,21 @@ def get_db():
         charset="utf8mb4",
         cursorclass=pymysql.cursors.DictCursor
     )
+
+@app.before_request
+def start_timer():
+    request.start_time = time.time()
+
+@app.after_request
+def record_metrics(response):
+    request_latency = time.time() - request.start_time
+    REQUEST_LATENCY.labels(request.method, request.path).observe(request_latency)
+    REQUEST_COUNT.labels(request.method, request.path, response.status_code).inc()
+    return response
+
+@app.route("/metrics")
+def metrics():
+    return generate_latest(), 200, {"Content-Type":CONTENT_TYPE_LATEST}
 
 @app.route("/health")
 def health():

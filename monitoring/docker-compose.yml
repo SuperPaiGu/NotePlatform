@@ -20,6 +20,9 @@ services:
       - prometheus_data:/prometheus
     ports:
       - "9090:9090"
+    networks:
+      - default
+      - observability
 
   grafana:
     image: grafana/grafana:latest
@@ -35,3 +38,7 @@ services:
 volumes:
   prometheus_data:
   grafana_data:
+
+networks:
+  observability:
+    external: true
