@@ -1,0 +1,11 @@
+groups:
+  - name: noteplatform-alerts
+    rules:
+      - alert: InstanceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "监控目标 {{ $labels.instance }} 掉线了"
+          description: "{{ $labels.job }} 的实例 {{ $labels.instance }} 已经无法抓取超过 1 分钟"
