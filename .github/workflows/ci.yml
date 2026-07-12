@@ -42,6 +42,9 @@ jobs:
           echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" >> .env
           echo "MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }}" >> .env
 
+      - name: Create observability network for CI
+        run: docker network create observability
+
       - name: Docker Compose up
         run: docker compose up --build -d
 
