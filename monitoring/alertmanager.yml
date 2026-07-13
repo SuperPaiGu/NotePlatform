@@ -15,13 +15,13 @@ route:
 receivers:
   - name: 'default-receiver'
     webhook_configs:
-      - url: 'https://webhook.site/b626637a-c801-468f-ba60-3d9a8b49e785'
+      - url: 'http://dingtalk-webhook:5000/dingtalk'
         send_resolved: true
   - name: 'critical-receiver'
     webhook_configs:
-      - url: 'https://webhook.site/b626637a-c801-468f-ba60-3d9a8b49e785'
+      - url: 'http://dingtalk-webhook:5000/dingtalk'
         send_resolved: true
   - name: 'warning-receiver'
     webhook_configs:
-      - url: 'https://webhook.site/4c8b3e92-7ced-4681-8c9a-d0f70b9f792f'
+      - url: 'http://dingtalk-webhook:5000/dingtalk'
         send_resolved: true

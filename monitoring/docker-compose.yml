@@ -45,6 +45,13 @@ services:
     ports:
       - "9093:9093"
 
+  dingtalk-webhook:
+    build: ./dingtalk-webhook
+    container_name: dingtalk-webhook
+    restart: unless-stopped
+    env_file:
+      - .env
+
 volumes:
   prometheus_data:
   grafana_data:
