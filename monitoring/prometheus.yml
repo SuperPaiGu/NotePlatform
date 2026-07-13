@@ -5,6 +5,11 @@ global:
 rule_files:
   - "alert.rules.yml"
 
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ['alertmanager:9093']
+
 scrape_configs:
   - job_name: 'node'
     static_configs:
@@ -13,3 +18,7 @@ scrape_configs:
   - job_name: 'web'
     static_configs:
       - targets: ['web:5000']
+
+  - job_name: 'alertmanager'
+    static_configs:
+      - targets: ['alertmanager:9093']

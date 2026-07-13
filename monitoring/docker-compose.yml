@@ -36,6 +36,15 @@ services:
     ports:
       - "3000:3000"
 
+  alertmanager:
+    image: prom/alertmanager:latest
+    container_name: alertmanager
+    restart: unless-stopped
+    volumes:
+      - ./alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+    ports:
+      - "9093:9093"
+
 volumes:
   prometheus_data:
   grafana_data:
