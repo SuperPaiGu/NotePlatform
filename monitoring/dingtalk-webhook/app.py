@@ -19,7 +19,9 @@ def dingtalk():
         emoji = "🔴" if status == "firing" else "✅"
         lines.append(f"{emoji} [告警] {name}\n级别: {severity}\n状态: {status}\n{summary}")
     content = "\n\n".join(lines)
+    print(f"[收到告警] {content}", flush=True)
     resp = requests.post(DINGTALK_URL, json={"msgtype": "text", "text": {"content": content}})
+    print(f"[钉钉响应] {resp.status_code} {resp.text}", flush=True)
     return resp.text, 200
 
 if __name__ == "__main__":
