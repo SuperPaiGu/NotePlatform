@@ -36,7 +36,7 @@ def metrics():
 
 @app.route("/health")
 def health():
-    return {"status": "ok", "version": "v2"}
+    return {"status": "ok", "version": "v3"}
 
 @app.route("/api/notes", methods=["GET"])
 def list_notes():
