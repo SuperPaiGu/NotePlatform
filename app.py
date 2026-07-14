@@ -26,8 +26,9 @@ def start_timer():
 @app.after_request
 def record_metrics(response):
     request_latency = time.time() - request.start_time
-    REQUEST_LATENCY.labels(request.method, request.path).observe(request_latency)
-    REQUEST_COUNT.labels(request.method, request.path, response.status_code).inc()
+    endpoint = str(request.url_rule)
+    REQUEST_LATENCY.labels(request.method, endpoint).observe(request_latency)
+    REQUEST_COUNT.labels(request.method, endpoint, response.status_code).inc()
     return response
 
 @app.route("/metrics")
