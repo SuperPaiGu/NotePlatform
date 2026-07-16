@@ -13,6 +13,9 @@ spec:
     metadata:
       labels:
         app: note-web
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "{{ .Values.web.containerPort }}"
     spec:
       containers:
         - name: note-web
