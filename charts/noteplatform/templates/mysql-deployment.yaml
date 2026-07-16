@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: note-db
+  labels:
+    app: note-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: note-db
+  template:
+    metadata:
+      labels:
+        app: note-db
+    spec:
+      containers:
+        - name: mysql
+          image: {{ .Values.mysql.image }}
+          ports:
+            - containerPort: {{ .Values.mysql.servicePort }}
+          envFrom:
+            - secretRef:
+                name: note-db-secret
+          volumeMounts:
+            - name: mysql-storage
+              mountPath: /var/lib/mysql
+            - name: init-sql
+              mountPath: /docker-entrypoint-initdb.d
+      volumes:
+        - name: mysql-storage
+          persistentVolumeClaim:
+            claimName: mysql-pvc
+        - name: init-sql
+          configMap:
+            name: note-db-init

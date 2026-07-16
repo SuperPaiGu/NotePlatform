@@ -1,0 +1,6 @@
+apiVersion: v2
+name: noteplatform
+description: A Helm chart for NotePlatform
+type: application
+version: 0.1.0
+appVersion: "v3"

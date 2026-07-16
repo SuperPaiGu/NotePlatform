@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: note-web
+  labels:
+    app: note-web
+spec:
+  replicas: {{ .Values.web.replicas }}
+  selector:
+    matchLabels:
+      app: note-web
+  template:
+    metadata:
+      labels:
+        app: note-web
+    spec:
+      containers:
+        - name: note-web
+          image: {{ .Values.web.image }}
+          ports:
+            - containerPort: {{ .Values.web.containerPort }}
+          envFrom:
+            - secretRef:
+                name: note-db-secret
+          resources:
+            requests:
+              cpu: {{ .Values.web.resources.requests.cpu }}
+              memory: {{ .Values.web.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.web.resources.limits.cpu }}
+              memory: {{ .Values.web.resources.limits.memory }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.web.containerPort }}
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: {{ .Values.web.containerPort }}
+            initialDelaySeconds: 5
+            periodSeconds: 5

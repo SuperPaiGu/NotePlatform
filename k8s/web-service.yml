@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: note-web
+spec:
+  selector:
+    app: note-web
+  ports:
+    - port: 80
+      targetPort: 5000

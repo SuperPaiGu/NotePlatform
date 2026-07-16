@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: note-web
+  labels:
+    app: note-web
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: note-web
+  template:
+    metadata:
+      labels:
+        app: note-web
+    spec:
+      containers:
+        - name: note-web
+          image: ghcr.io/superpaigu/noteplatform:latest
+          ports:
+            - containerPort: 5000
+          envFrom:
+            - secretRef:
+                name: note-db-secret
+          resources:
+            requests:
+              cpu: 100m
+              memory: 64Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 5000
+            initialDelaySeconds: 5
+            periodSeconds: 5
