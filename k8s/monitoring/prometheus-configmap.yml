@@ -49,10 +49,18 @@ data:
               summary: "监控目标 {{ $labels.instance }} 掉线了"
               description: "{{ $labels.job }} 的实例 {{ $labels.instance }} 已经无法抓取超过 1 分钟"
           - alert: HighErrorRate
-            expr: sum(rate(http_requests_total{http_status=~"5.."}[5m])) / sum(rate(http_requests_total[5m])) > 0.05
+            expr: sum(rate(http_requests_total{http_status=~"5.."}[5m])) / sum(rate(http_requests_total[5m])) > 0.01 and sum(rate(http_requests_total[5m])) > 0.2
             for: 2m
             labels:
               severity: warning
             annotations:
               summary: "5xx 错误率过高"
-              description: "过去5分钟 5xx 错误率为 {{ $value | humanizePercentage }}, 已超过 5% 阈值"
+              description: "过去5分钟 5xx 错误率为 {{ $value | humanizePercentage }}, 已超过 1% 阈值"
+          - alert: HighLatency
+            expr: histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket[5m]))) > 0.5
+            for: 2m
+            labels:
+              severity: warning
+            annotations:
+              summary: "P95 延迟过高"
+              description: "过去5分钟 P95 延迟为 {{ $value | humanizeDuration }}, 已超过 500ms 阈值"
