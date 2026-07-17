@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: dingtalk-webhook
+  namespace: monitoring
+spec:
+  selector:
+    app: dingtalk-webhook
+  ports:
+    - port: 5000
+      targetPort: 5000

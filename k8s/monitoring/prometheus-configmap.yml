@@ -7,6 +7,13 @@ data:
   prometheus.yml: |
     global:
       scrape_interval: 15s
+      evaluation_interval: 15s
+    alerting:
+      alertmanagers:
+        - static_configs:
+            - targets: ['alertmanager:9093']
+    rule_files:
+      - '/etc/prometheus/alert.rules.yml'
     scrape_configs:
       - job_name: 'prometheus'
         static_configs:
@@ -29,3 +36,23 @@ data:
           - source_labels: [__meta_kubernetes_pod_name]
             action: replace
             target_label: pod
+  alert.rules.yml: |
+    groups:
+      - name: noteplatform-alerts
+        rules:
+          - alert: InstanceDown
+            expr: up == 0
+            for: 1m
+            labels:
+              severity: critical
+            annotations:
+              summary: "监控目标 {{ $labels.instance }} 掉线了"
+              description: "{{ $labels.job }} 的实例 {{ $labels.instance }} 已经无法抓取超过 1 分钟"
+          - alert: HighErrorRate
+            expr: sum(rate(http_requests_total{http_status=~"5.."}[5m])) / sum(rate(http_requests_total[5m])) > 0.05
+            for: 2m
+            labels:
+              severity: warning
+            annotations:
+              summary: "5xx 错误率过高"
+              description: "过去5分钟 5xx 错误率为 {{ $value | humanizePercentage }}, 已超过 5% 阈值"

@@ -210,6 +210,13 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
+      - name: Build and push dingtalk-webhook image
+        uses: docker/build-push-action@v7
+        with:
+          context: ./monitoring/dingtalk-webhook
+          push: true
+          tags: ${{ env.REGISTRY }}/superpaigu/noteplatform-dingtalk:latest
+
       - name: Print Logs when failing
         if: failure()
         run: |
